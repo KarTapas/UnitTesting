@@ -20,7 +20,6 @@ final class LoginPageUnitTestingTests: XCTestCase {
                     XCTAssertNotNil(self.viewModel.tokenResponse?.getToken())
                     if let jsonData = try? JSONEncoder().encode(self.viewModel.tokenResponse),
                                let jsonDictionary = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-                        //checking the key "token"
                                 XCTAssertTrue(jsonDictionary.keys.contains("token"), "The 'token' key should exist in the JSON data")
                             } else {
                                 XCTFail("Failed to get JSON data")
