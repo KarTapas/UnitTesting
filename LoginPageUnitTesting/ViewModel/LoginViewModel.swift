@@ -2,35 +2,45 @@
 
 import Foundation
 import Alamofire
-import SwiftUI
 
 class LoginViewModel: ObservableObject {
-    @Published var tokenResponse: TokenResponse?
-    @Published var isLoggedIn: Bool = false
-    
-    func getToken(username: String, password: String, completion: @escaping (Bool) -> Void) {
-        let basicAuth = "\(username):\(password)"
-        let base64Auth = Data(basicAuth.utf8).base64EncodedString()
+    @Published var token: String
+    @Published var expiresOn: String
+    @Published var isLoggedIn: Bool
+
+    init() {
+        self.token = ""
+        self.expiresOn = ""
+        self.isLoggedIn = false
+    }
+
+    func login(username: String, password: String) {
+        let authString = "\(username):\(password)"
+        guard let authData = authString.data(using: .utf8)?.base64EncodedString() else {
+            return
+        }
+
         let headers: HTTPHeaders = [
             "X-Nspire-AppToken": "f07740dc-1252-48f3-9165-c5263bbf373c",
-            "Authorization": "Basic \(base64Auth)"
+            "Authorization": "Basic \(authData)"
         ]
+
         AF.request("https://identity-stage.spireon.com/identity/token", method: .get, headers: headers)
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: TokenResponse.self) { response in
+            .validate()
+            .responseDecodable(of: TokenResponse.self) { [weak self] response in
                 switch response.result {
                 case .success(let tokenResponse):
-                    self.tokenResponse = tokenResponse
-                    if !tokenResponse.token.isEmpty && !tokenResponse.expiresOn.isEmpty {
-                                      self.tokenResponse = tokenResponse
-                       print(tokenResponse.expiresOn)
-                                      completion(true)
-                        self.isLoggedIn = true
-                                  }
-                case .failure:
-                    completion(false)
-                    self.isLoggedIn = true
+                    self?.token = tokenResponse.token
+                    self?.expiresOn = tokenResponse.expiresOn
+                    self?.isLoggedIn = true
+
+                case .failure(let error):
+                    print(error)
+                    self?.isLoggedIn = false
                 }
             }
     }
 }
+
+
+

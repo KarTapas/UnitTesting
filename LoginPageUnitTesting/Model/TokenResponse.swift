@@ -8,11 +8,4 @@
 struct TokenResponse: Codable {
     let token: String
     let expiresOn: String
-    
-    func getToken() -> String {
-            return token
-        }
-    func getExpiresOn() -> String {
-            return expiresOn
-        }
 }

@@ -1,45 +1,47 @@
-
 import XCTest
-import Alamofire
 @testable import LoginPageUnitTesting
 
-final class LoginPageUnitTestingTests: XCTestCase {
-    let viewModel = LoginViewModel()
+final class UnitTestTests: XCTestCase {
+
+        
+        
+    func testLoginSuccess() {
+            let viewModel = LoginViewModel()
+            let expectation = XCTestExpectation(description: "Login successful")
+            
+            viewModel.login(username: "atistagetest", password: "Password1")
+            
+            DispatchQueue.global().async {
+               
+                sleep(5)
+               
+                XCTAssertTrue(viewModel.isLoggedIn)
+                
+
+                expectation.fulfill()
+            }
+            
+
+            wait(for: [expectation], timeout: 10)
+        }
     
     
-    override func setUpWithError() throws {
-        }
-        override func tearDownWithError() throws {
-        }
-        func testSuccessfulLogin() {
-                let expectation = XCTestExpectation(description: "Successful login")
-                viewModel.getToken(username: "atistagetest", password: "Password1") { success in
-                XCTAssertTrue(success)
-                    XCTAssertNotNil(self.viewModel.tokenResponse)
-                    XCTAssertNotNil(self.viewModel.tokenResponse?.getExpiresOn())
-                    XCTAssertNotNil(self.viewModel.tokenResponse?.getToken())
-                    if let jsonData = try? JSONEncoder().encode(self.viewModel.tokenResponse),
-                               let jsonDictionary = try? JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
-                                XCTAssertTrue(jsonDictionary.keys.contains("token"), "The 'token' key should exist in the JSON data")
-                            } else {
-                                XCTFail("Failed to get JSON data")
-                            }
-                    expectation.fulfill()
-                }
-                wait(for: [expectation], timeout: 5.0)
+        
+        func testLoginFailure() {
+            let viewModel = LoginViewModel()
+            let expectation = XCTestExpectation(description: "Login failed")
+            
+            viewModel.login(username: "atistagetest", password: "WrongPassword")
+            
+            DispatchQueue.global().async {
+               
+                sleep(5)
+                XCTAssertFalse(viewModel.isLoggedIn)
+
+                expectation.fulfill()
             }
-        func testFailedLogin() {
-                let expectation = XCTestExpectation(description: "Failed login")
-                viewModel.getToken(username: "atistagetest", password: "Password") { success in
-                    XCTAssertFalse(success)
-                    XCTAssertNil(self.viewModel.tokenResponse)
-                    expectation.fulfill()
-                }
-                wait(for: [expectation], timeout: 5.0)
-            }
-        func testPerformanceExample() throws {
-            measure {
-            }
+            wait(for: [expectation], timeout: 10)
         }
     }
+
 
